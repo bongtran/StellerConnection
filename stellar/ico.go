@@ -4,11 +4,11 @@ import (
 	"github.com/stellar/go/keypair"
 )
 
-func InitAccount() (bool, keypair.Full) {
+func InitAccount() (error, keypair.Full) {
 	pair, err := CreateKeyPair()
 
 	if err != nil {
-		return false, *pair
+		return err, *pair
 	}
 
 	result := CreateAccount(pair.Address())

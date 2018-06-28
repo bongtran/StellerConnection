@@ -10,6 +10,7 @@ import (
 	"StellarConnection/emails"
 	"StellarConnection/utils"
 	"StellarConnection/constants"
+	"StellarConnection/stellar"
 	"time"
 	"github.com/gorilla/mux"
 )
@@ -157,9 +158,24 @@ func Activate(w http.ResponseWriter, r *http.Request) {
 			Token: token,
 		}
 		data.Data = authUser
+		err, pair := stellar.InitAccount()
+		if err == nil {
+			col = dataStore.Collection("userkeypair")
+			keyStore := store.KeyStore{col}
+
+			//userID := bson.ObjectId()
+			userPair := model.UserKeyPair{Address: pair.Address(),
+				Seed: pair.Seed(),}
+
+			userPair.UserID = user.ID
+
+			err = keyStore.Create(userPair)
+			if err == nil {
+				emails.SendKeyEmail(dataResource.Email, pair)
+			}
+		}
 		break
 	}
-	// Generate JWT token
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -252,19 +268,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 		// Clean-up the hashpassword to eliminate it from response JSON
 		userData := model.UserLite{
-			Email:result.Email,
-			ID:result.ID,
-			Location:result.Location,
-			Role:result.Role,
-			MyUrl:result.MyUrl,
-			Description:result.Description,
-			LastName:result.LastName,
-			FirstName:result.FirstName,
-			Activated:result.Activated,
-			Avatar:result.Avatar,
-			IDCardUrl:result.IDCardUrl,
-			PhoneNumber:result.PhoneNumber,
-
+			Email:       result.Email,
+			ID:          result.ID,
+			Location:    result.Location,
+			Role:        result.Role,
+			MyUrl:       result.MyUrl,
+			Description: result.Description,
+			LastName:    result.LastName,
+			FirstName:   result.FirstName,
+			Activated:   result.Activated,
+			Avatar:      result.Avatar,
+			IDCardUrl:   result.IDCardUrl,
+			PhoneNumber: result.PhoneNumber,
 		}
 		authUser := model.AuthUserModel{
 			User:  userData,

@@ -32,9 +32,10 @@ func GetBalanceFromID(w http.ResponseWriter, r *http.Request) {
 
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	result, pair := stellar.InitAccount()
-	//pairByte, err := json.Marshal(pair)
-
-	//userKeyPair :=
+	if result != nil {
+		common.DisplayAppError(w, result, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 	dataStore := common.NewDataStore()
 	defer dataStore.Close()
 
@@ -53,7 +54,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	//account, err := horizon.DefaultTestNetClient.LoadAccount(userPair.Seed)
 	data, err := json.Marshal(userPair)
 
-	if !result || err != nil {
+	if err != nil {
 		common.DisplayAppError(w, err, "Internal server error", http.StatusInternalServerError)
 	} else {
 		w.Header().Set("Content-Type", "application/json")
