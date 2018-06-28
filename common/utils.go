@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"StellarConnection/model"
+	"StellarConnection/constants"
 )
 
 type (
@@ -37,6 +39,52 @@ func DisplayAppError(w http.ResponseWriter, handlerError error, message string, 
 		w.Write(j)
 	}
 }
+
+
+func ResponseError(w http.ResponseWriter, handlerError error, message string, code int) {
+	data := model.ResponseModel{
+		StatusCode: code,
+		Error:      handlerError.Error(),
+		Data:       message,
+	}
+
+	j, err := json.Marshal(data)
+	if err != nil {
+		DisplayAppError(
+			w,
+			err,
+			"An unexpected error has occurred",
+			constants.InternalError.V(),
+		)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(j)
+}
+
+func ResponseErrorString(w http.ResponseWriter, errString string, message string, code int) {
+	data := model.ResponseModel{
+		StatusCode: code,
+		Error:      errString,
+		Data:       message,
+	}
+
+	j, err := json.Marshal(data)
+	if err != nil {
+		DisplayAppError(
+			w,
+			err,
+			"An unexpected error has occurred",
+			constants.InternalError.V(),
+		)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(j)
+}
+
 
 // AppConfig holds the configuration values from config.json file
 var AppConfig configuration
