@@ -6,6 +6,7 @@ import (
 )
 
 type (
+	// User type represents the registered user.
 	User struct {
 		ID           bson.ObjectId `bson:"_id,omitempty" json:"id"`
 		FirstName    string        `json:"firstname"`
